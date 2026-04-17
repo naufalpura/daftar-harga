@@ -2,114 +2,206 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daftar Harga Simpel</title>
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@400;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Daftar Harga Produk</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Bootstrap & DataTables CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.css" />
+    <!-- Lucide Icons for arrow -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-      body {
-        background-color: #ffffff;
-        font-family: "Inter", sans-serif;
-        color: #000;
+      :root {
+        --bg-color: #f4f7f6;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --primary: #3b82f6;
+        --primary-bg: #eff6ff;
+        --danger: #ef4444;
+        --border-color: #e2e8f0;
       }
 
-      /* Search Box: Full Width & Tebal */
+      body {
+        background-color: var(--bg-color);
+        font-family: "Inter", sans-serif;
+        color: var(--text-main);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .app-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 15px;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+      .page-header h3 {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      /* Search Box Modern */
       .dataTables_filter {
         width: 100%;
+        text-align: left !important;
       }
       .dataTables_filter input {
         width: 100% !important;
-        margin: 10px 0 20px 0 !important;
-        padding: 25px !important;
-        border: 4px solid #000 !important; /* Kontras maksimal */
-        border-radius: 0 !important;
-        font-size: 1.4rem !important;
-        font-weight: 900;
-        text-transform: uppercase;
+        margin-bottom: 20px !important;
+        padding: 18px 24px !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: 16px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+      .dataTables_filter input:focus {
+        border-color: var(--primary) !important;
+        outline: none;
       }
 
-      /* Baris List */
-      .product-row {
-        padding: 12px 10px;
-        border-bottom: 2px solid #eeeeee;
+      /* Table Structure Hiding */
+      #example thead { display: none; }
+      .table td { padding: 0; border: none !important; }
+      table.dataTable {
+        border-collapse: separate !important;
+        border-spacing: 0 10px !important;
+      }
+
+      /* Product Card Collapsible */
+      .product-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      }
+
+      /* Header kartu yang bisa diklik */
+      .card-header-toggle {
+        padding: 16px 20px;
         display: flex;
         align-items: center;
-        flex-wrap: wrap; /* Agar aman di HP kecil */
-        font-size: 1.15rem;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+      }
+      .card-header-toggle:hover {
+        background-color: #f8fafc;
+      }
+
+      .name-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .chevron-icon {
+        color: var(--text-muted);
+        transition: transform 0.3s ease;
+      }
+      .product-card.active .chevron-icon {
+        transform: rotate(180deg);
       }
 
       .prod-name {
-        font-weight: 800;
-        text-transform: uppercase;
-        margin-right: 8px;
-      }
-
-      .arrow {
-        color: #888;
-        margin-right: 8px;
-        font-weight: bold;
-      }
-
-      .prod-detail {
-        color: #0056b3;
         font-weight: 700;
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .main-price-tag {
+        font-weight: 800;
+        color: var(--danger);
+        font-size: 1.1rem;
+        margin-left: 10px;
+        white-space: nowrap;
+      }
+
+      /* Bagian konten yang tersembunyi */
+      .card-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, padding 0.3s ease;
+        background-color: #ffffff;
+      }
+      .product-card.active .card-content {
+        max-height: 1000px; /* Nilai besar agar bisa menampung banyak list */
+        padding-bottom: 16px;
+        border-top: 1px solid #f1f5f9;
+      }
+
+      .variations-container {
+        padding: 10px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .variation-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        gap: 10px;
+      }
+
+      .prod-satuan {
+        background-color: var(--primary-bg);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
       }
 
       .prod-isi {
-        color: #666;
-        background: #f0f0f0;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        margin: 0 8px;
+        color: var(--text-muted);
         font-family: "Roboto Mono", monospace;
+        font-size: 0.75rem;
       }
 
-      .prod-price {
-        font-weight: 900;
-        color: #d32f2f;
-        margin-left: auto; /* Harga rata kanan */
+      .v-price {
+        font-weight: 700;
+        color: var(--text-main);
       }
 
-      /* Sembunyikan Tabel Asli */
-      #example thead {
-        display: none;
-      }
-      .table td {
-        padding: 0;
-        border: none !important;
-      }
-      .dataTables_info {
-        font-weight: bold;
-        padding: 20px;
-        text-align: center;
+      /* Mobile Adjustment */
+      @media (max-width: 480px) {
+        .prod-name { font-size: 0.95rem; }
+        .main-price-tag { font-size: 1rem; }
       }
     </style>
   </head>
 
   <body>
-    <div class="container-fluid py-4">
-      <div class="mb-3">
-        <h3 class="font-weight-black text-center">DAFTAR HARGA</h3>
+    <div class="app-container">
+      <div class="page-header">
+        <h3>DAFTAR HARGA</h3>
+        <p>Klik nama produk untuk detail satuan</p>
       </div>
 
       <table id="example" class="table" width="100%">
-        <thead>
-          <tr>
-            <th>Raw</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Data</th></tr></thead>
+        <tbody></tbody>
       </table>
     </div>
 
@@ -117,47 +209,90 @@
     <script src="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.js"></script>
 
     <script>
+      // Fungsi format rupiah
+      function formatIDR(val) {
+        if (val === 0) return "Hubungi Kami";
+        return "Rp " + new Intl.NumberFormat("id-ID").format(val);
+      }
+
       $(document).ready(function () {
-        $("#example").DataTable({
+        const table = $("#example").DataTable({
           ajax: {
             url: "https://script.google.com/macros/s/AKfycbxMZKsplbUsrvDkP5LLXcLVFSamfHYtmr2lnRqgb6S0-SOtqP0a9M3xu47lXBZrM3Dnpw/exec?action=getData",
             dataSrc: function (json) {
-              return json.map((row) => ({
-                nama: row[1],
-                satuan: row[3],
-                isi: row[4],
-                harga: row[5],
-              }));
+              const groupedData = {};
+              json.forEach((row) => {
+                const nama = row[1] || "Tanpa Nama";
+                let rawHarga = row[5] ? String(row[5]).replace(/[^0-9]/g, "") : "0";
+                let hargaNum = parseInt(rawHarga) || 0;
+
+                if (!groupedData[nama]) {
+                  groupedData[nama] = { nama: nama, variations: [] };
+                }
+                groupedData[nama].variations.push({
+                  satuan: row[3] || "-",
+                  isi: row[4] || "-",
+                  harga: hargaNum,
+                });
+              });
+              return Object.values(groupedData);
             },
           },
           columns: [
             {
               data: null,
               render: function (data) {
-                const hargaFmt = new Intl.NumberFormat("id-ID", {
-                  style: "decimal",
-                  minimumFractionDigits: 0,
-                }).format(data.harga);
+                // Cari harga utama: Utamakan "PCS", jika tidak ada ambil index pertama
+                let mainVariation = data.variations.find(v => v.satuan.toLowerCase().includes('pcs'));
+                if (!mainVariation) mainVariation = data.variations[0];
+
+                let variationsHtml = '';
+                data.variations.forEach((v) => {
+                  variationsHtml += `
+                    <div class="variation-row">
+                      <div class="d-flex align-items-center" style="gap:8px">
+                        <span class="prod-satuan">${v.satuan}</span>
+                        <span class="prod-isi">isi: ${v.isi}</span>
+                      </div>
+                      <div class="v-price">${formatIDR(v.harga)}</div>
+                    </div>
+                  `;
+                });
 
                 return `
-                <div class="product-row">
-                  <span class="prod-name">${data.nama}</span>
-                  <span class="arrow">→</span>
-                  <span class="prod-detail">${data.satuan}</span>
-                  <span class="prod-isi">(${data.isi})</span>
-                  <span class="prod-price">Rp ${hargaFmt}</span>
+                <div class="product-card">
+                  <div class="card-header-toggle">
+                    <div class="name-section">
+                      <i data-lucide="chevron-down" class="chevron-icon"></i>
+                      <div class="prod-name">${data.nama}</div>
+                    </div>
+                    <div class="main-price-tag">${formatIDR(mainVariation.harga)}</div>
+                  </div>
+                  <div class="card-content">
+                    <div class="variations-container">
+                      ${variationsHtml}
+                    </div>
+                  </div>
                 </div>`;
               },
             },
           ],
           order: [[0, "asc"]],
           displayLength: 50,
+          drawCallback: function() {
+            lucide.createIcons(); // Re-render icons after table draw
+          },
           language: {
             search: "",
-            searchPlaceholder: "CARI NAMA PRODUK...",
-            info: "Total: _TOTAL_ Barang",
-            paginate: { previous: "PREV", next: "NEXT" },
-          },
+            searchPlaceholder: "🔍 Cari produk...",
+            info: "Total: _TOTAL_ Produk",
+            paginate: { previous: "Prev", next: "Next" },
+          }
+        });
+
+        // Event listener untuk buka-tutup kartu
+        $('#example').on('click', '.card-header-toggle', function() {
+          $(this).closest('.product-card').toggleClass('active');
         });
       });
     </script>
