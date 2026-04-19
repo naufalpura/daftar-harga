@@ -16,13 +16,13 @@
 
     <style>
       :root {
-        --bg-color: #f4f7f6;
+        --bg-color: #f8fafc;
         --card-bg: #ffffff;
-        --text-main: #1e293b;
+        --text-main: #0f172a;
         --text-muted: #64748b;
-        --primary: #3b82f6;
+        --primary: #2563eb;
         --primary-bg: #eff6ff;
-        --danger: #ef4444;
+        --danger: #dc2626;
         --border-color: #e2e8f0;
       }
 
@@ -31,95 +31,111 @@
         font-family: "Inter", sans-serif;
         color: var(--text-main);
         -webkit-font-smoothing: antialiased;
+        padding-bottom: 50px;
       }
 
       .app-container {
-        max-width: 800px;
+        max-width: 600px; /* Lebih ramping untuk tampilan ala aplikasi mobile */
         margin: 0 auto;
-        padding: 20px 15px;
+        padding: 15px;
       }
 
       .page-header {
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
+        padding: 10px 0;
       }
       .page-header h3 {
         font-weight: 800;
+        font-size: 1.5rem;
         letter-spacing: -0.5px;
+        margin-bottom: 4px;
+      }
+      .page-header p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
       }
 
-      /* Search Box Modern */
+      /* Search Box Modern & Responsive */
       .dataTables_filter {
         width: 100%;
         text-align: left !important;
       }
+      .dataTables_filter label {
+        width: 100%;
+      }
       .dataTables_filter input {
         width: 100% !important;
-        margin-bottom: 20px !important;
-        padding: 18px 24px !important;
+        margin: 0 0 15px 0 !important;
+        padding: 14px 20px !important;
         border: 2px solid var(--border-color) !important;
-        border-radius: 16px !important;
-        font-size: 1.1rem !important;
+        border-radius: 12px !important;
+        font-size: 1rem !important;
         font-weight: 600;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
       }
       .dataTables_filter input:focus {
         border-color: var(--primary) !important;
+        background: #fff;
         outline: none;
       }
 
-      /* Table Structure Hiding */
+      /* DataTables Layout */
       #example thead { display: none; }
       .table td { padding: 0; border: none !important; }
       table.dataTable {
         border-collapse: separate !important;
-        border-spacing: 0 10px !important;
+        border-spacing: 0 8px !important;
       }
 
-      /* Product Card Collapsible */
+      /* Product Card */
       .product-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 16px;
+        border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        transition: transform 0.1s ease;
       }
-
-      /* Header kartu yang bisa diklik */
+      
       .card-header-toggle {
-        padding: 16px 20px;
+        padding: 14px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         cursor: pointer;
-        user-select: none;
-        transition: background 0.2s;
+        gap: 10px;
       }
-      .card-header-toggle:hover {
-        background-color: #f8fafc;
+      
+      .card-header-toggle:active {
+        background-color: #f1f5f9;
       }
 
       .name-section {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         flex: 1;
-        min-width: 0;
+        min-width: 0; /* Penting untuk text-overflow */
       }
 
       .chevron-icon {
         color: var(--text-muted);
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
         transition: transform 0.3s ease;
       }
       .product-card.active .chevron-icon {
         transform: rotate(180deg);
+        color: var(--primary);
       }
 
       .prod-name {
         font-weight: 700;
-        font-size: 1.05rem;
+        font-size: 0.95rem;
         text-transform: uppercase;
+        color: var(--text-main);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -128,26 +144,24 @@
       .main-price-tag {
         font-weight: 800;
         color: var(--danger);
-        font-size: 1.1rem;
-        margin-left: 10px;
-        white-space: nowrap;
+        font-size: 1rem;
+        flex-shrink: 0;
       }
 
-      /* Bagian konten yang tersembunyi */
+      /* Content Area */
       .card-content {
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.3s ease-out, padding 0.3s ease;
-        background-color: #ffffff;
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: #fafbfc;
       }
       .product-card.active .card-content {
-        max-height: 1000px; /* Nilai besar agar bisa menampung banyak list */
-        padding-bottom: 16px;
+        max-height: 2000px;
         border-top: 1px solid #f1f5f9;
       }
 
       .variations-container {
-        padding: 10px 20px;
+        padding: 12px;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -157,37 +171,71 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 14px;
-        background-color: #f8fafc;
-        border-radius: 12px;
-        gap: 10px;
+        padding: 10px 12px;
+        background-color: #fff;
+        border: 1px solid #f1f5f9;
+        border-radius: 10px;
       }
 
       .prod-satuan {
         background-color: var(--primary-bg);
         color: var(--primary);
         font-weight: 700;
-        font-size: 0.7rem;
-        padding: 3px 8px;
-        border-radius: 6px;
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        border-radius: 5px;
         text-transform: uppercase;
       }
 
       .prod-isi {
         color: var(--text-muted);
         font-family: "Roboto Mono", monospace;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
       }
 
       .v-price {
         font-weight: 700;
         color: var(--text-main);
+        font-size: 0.9rem;
       }
 
       /* Mobile Adjustment */
       @media (max-width: 480px) {
-        .prod-name { font-size: 0.95rem; }
-        .main-price-tag { font-size: 1rem; }
+        .app-container { padding: 10px; }
+        .page-header h3 { font-size: 1.3rem; }
+        .card-header-toggle { padding: 12px; }
+        .prod-name { font-size: 0.85rem; }
+        .main-price-tag { font-size: 0.95rem; }
+        
+        .variation-row {
+            flex-direction: row; /* Tetap row jika muat */
+            font-size: 0.85rem;
+        }
+      }
+
+      /* Pagination Styling */
+      .dataTables_info {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 15px 0;
+      }
+      .pagination {
+        justify-content: center;
+      }
+      .page-link {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        border-radius: 8px !important;
+        margin: 0 2px;
+        border: none;
+        background: #fff;
+        color: var(--text-main);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+      .page-item.active .page-link {
+        background-color: var(--primary);
       }
     </style>
   </head>
@@ -196,7 +244,7 @@
     <div class="app-container">
       <div class="page-header">
         <h3>DAFTAR HARGA</h3>
-        <p>Klik nama produk untuk detail satuan</p>
+        <p>Sentuh nama produk untuk detail variasi</p>
       </div>
 
       <table id="example" class="table" width="100%">
@@ -209,14 +257,13 @@
     <script src="https://cdn.datatables.net/v/bs4/dt-1.10.18/datatables.min.js"></script>
 
     <script>
-      // Fungsi format rupiah
       function formatIDR(val) {
-        if (val === 0) return "Hubungi Kami";
+        if (val === 0) return "Tanya Harga";
         return "Rp " + new Intl.NumberFormat("id-ID").format(val);
       }
 
       $(document).ready(function () {
-        const table = $("#example").DataTable({
+        $("#example").DataTable({
           ajax: {
             url: "https://script.google.com/macros/s/AKfycbxMZKsplbUsrvDkP5LLXcLVFSamfHYtmr2lnRqgb6S0-SOtqP0a9M3xu47lXBZrM3Dnpw/exec?action=getData",
             dataSrc: function (json) {
@@ -242,15 +289,15 @@
             {
               data: null,
               render: function (data) {
-                // Cari harga utama: Utamakan "PCS", jika tidak ada ambil index pertama
-                let mainVariation = data.variations.find(v => v.satuan.toLowerCase().includes('pcs'));
+                // Logika Harga Utama: Pcs > Harga terkecil > Harga pertama
+                let mainVariation = data.variations.find(v => v.satuan.toLowerCase() === 'pcs');
                 if (!mainVariation) mainVariation = data.variations[0];
 
                 let variationsHtml = '';
                 data.variations.forEach((v) => {
                   variationsHtml += `
                     <div class="variation-row">
-                      <div class="d-flex align-items-center" style="gap:8px">
+                      <div class="d-flex align-items-center" style="gap:6px">
                         <span class="prod-satuan">${v.satuan}</span>
                         <span class="prod-isi">isi: ${v.isi}</span>
                       </div>
@@ -280,19 +327,20 @@
           order: [[0, "asc"]],
           displayLength: 50,
           drawCallback: function() {
-            lucide.createIcons(); // Re-render icons after table draw
+            lucide.createIcons();
           },
           language: {
             search: "",
-            searchPlaceholder: "🔍 Cari produk...",
-            info: "Total: _TOTAL_ Produk",
+            searchPlaceholder: "🔍 Cari nama barang...",
+            info: "_TOTAL_ Barang ditemukan",
             paginate: { previous: "Prev", next: "Next" },
           }
         });
 
-        // Event listener untuk buka-tutup kartu
+        // Click handler untuk mobile-friendly
         $('#example').on('click', '.card-header-toggle', function() {
-          $(this).closest('.product-card').toggleClass('active');
+          const card = $(this).closest('.product-card');
+          card.toggleClass('active');
         });
       });
     </script>
