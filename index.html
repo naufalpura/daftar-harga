@@ -102,14 +102,13 @@
         margin-top: 5px !important;
       }
 
-      /* Product Card - Native App Style */
+      /* Product Card */
       .product-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-        transition: all 0.2s ease;
       }
       
       .card-header-toggle {
@@ -120,11 +119,11 @@
         cursor: pointer;
         gap: 12px;
         background: #fff;
+        -webkit-tap-highlight-color: transparent;
       }
       
       .card-header-toggle:active {
         background-color: #f8fafc;
-        opacity: 0.8;
       }
 
       .name-section {
@@ -153,7 +152,6 @@
         line-height: 1.2;
         text-transform: uppercase;
         color: var(--text-main);
-        /* Mencegah teks terlalu lebar di HP */
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -208,7 +206,6 @@
         padding: 2px 8px;
         border-radius: 6px;
         text-transform: uppercase;
-        display: inline-block;
       }
 
       .prod-isi {
@@ -224,16 +221,15 @@
         font-size: 0.9rem;
       }
 
-      /* Mobile Customization */
+      /* Mobile Adjustment */
       @media (max-width: 480px) {
         .page-header h3 { font-size: 1.25rem; }
         .card-header-toggle { padding: 12px 14px; }
         .prod-name { font-size: 0.9rem; }
         .main-price-tag { font-size: 0.95rem; }
-        .variation-row { padding: 8px 10px; }
       }
 
-      /* Info & Pagination */
+      /* Pagination */
       .dataTables_info {
         font-size: 0.75rem;
         font-weight: 600;
@@ -241,10 +237,7 @@
         text-align: center;
         padding: 15px 0;
       }
-      .pagination {
-        justify-content: center;
-        margin-bottom: 20px;
-      }
+      .pagination { justify-content: center; margin-bottom: 20px; }
       .page-link {
         padding: 8px 14px;
         font-size: 0.85rem;
@@ -253,15 +246,7 @@
         border: 1px solid #e2e8f0;
         color: var(--text-main);
       }
-      .page-item.active .page-link {
-        background-color: var(--primary);
-        border-color: var(--primary);
-      }
-
-      /* Hide focus outline on mobile taps */
-      .card-header-toggle, .page-link {
-        -webkit-tap-highlight-color: transparent;
-      }
+      .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
     </style>
   </head>
 
@@ -291,6 +276,30 @@
       }
 
       $(document).ready(function () {
+        // --- LOGIKA SEARCH KUSTOM ---
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
+          const searchTerm = settings.oPreviousSearch.sSearch.toLowerCase();
+          if (!searchTerm) return true;
+          if (!rowData) return false;
+
+          // Periksa Nama Produk
+          const nama = (rowData.nama || "").toLowerCase();
+          if (nama.includes(searchTerm)) return true;
+
+          // Periksa di setiap variasi
+          let matchFound = false;
+          if (rowData.variations) {
+            rowData.variations.forEach(v => {
+              if ((v.satuan || "").toLowerCase().includes(searchTerm) || 
+                  (v.isi || "").toString().toLowerCase().includes(searchTerm)) {
+                matchFound = true;
+              }
+            });
+          }
+
+          return matchFound;
+        });
+
         const table = $("#example").DataTable({
           ajax: {
             url: "https://script.google.com/macros/s/AKfycbxMZKsplbUsrvDkP5LLXcLVFSamfHYtmr2lnRqgb6S0-SOtqP0a9M3xu47lXBZrM3Dnpw/exec?action=getData",
@@ -317,16 +326,12 @@
             {
               data: null,
               render: function (data) {
-                // Cari harga utama: Urutan Pcs > Harga terkecil > Harga pertama
+                if (!data) return "";
+                
                 let mainVariation = data.variations.find(v => v.satuan.toLowerCase() === 'pcs');
                 if (!mainVariation) {
-                    // Cari harga terendah yang bukan 0
                     const validPrices = data.variations.filter(v => v.harga > 0);
-                    if (validPrices.length > 0) {
-                        mainVariation = validPrices.sort((a,b) => a.harga - b.harga)[0];
-                    } else {
-                        mainVariation = data.variations[0];
-                    }
+                    mainVariation = validPrices.length > 0 ? validPrices.sort((a,b) => a.harga - b.harga)[0] : data.variations[0];
                 }
 
                 let variationsHtml = '';
@@ -349,7 +354,7 @@
                       <i data-lucide="chevron-down" class="chevron-icon"></i>
                       <div class="prod-name">${data.nama}</div>
                     </div>
-                    <div class="main-price-tag">${formatIDR(mainVariation.harga)}</div>
+                    <div class="main-price-tag">${formatIDR(mainVariation ? mainVariation.harga : 0)}</div>
                   </div>
                   <div class="card-content">
                     <div class="variations-container">
@@ -362,31 +367,39 @@
           ],
           order: [[0, "asc"]],
           displayLength: 50,
-          dom: 'ftip', // Re-position filter (f)
+          dom: 'ftip',
+          initComplete: function() {
+            // Pindahkan search box HANYA SEKALI saat inisialisasi selesai
+            const filter = $(".dataTables_filter");
+            if (filter.length) {
+              $("#search-container").empty().append(filter);
+              // Tambahkan debounce manual agar tidak lag saat mengetik 1 huruf
+              const input = filter.find("input");
+              input.off().on("input", function() {
+                const val = $(this).val();
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                  table.search(val).draw();
+                }, 300);
+              });
+            }
+          },
           drawCallback: function() {
-            lucide.createIcons();
-            // Pindahkan search box ke container sticky buatan kita jika belum ada
-            if ($(".dataTables_filter").length) {
-                $("#search-container").append($(".dataTables_filter"));
+            // Hanya re-render ikon tanpa memindah elemen DOM input
+            if (typeof lucide !== 'undefined') {
+              lucide.createIcons();
             }
           },
           language: {
             search: "",
-            searchPlaceholder: "🔍 Cari nama produk...",
-            info: "_TOTAL_ Produk tersedia",
-            paginate: { previous: "Prev", next: "Next" },
+            searchPlaceholder: "🔍 Cari produk atau satuan...",
+            info: "_TOTAL_ Produk ditemukan",
+            paginate: { previous: "Sebelumnya", next: "Selanjutnya" },
           }
         });
 
-        // Event listener klik yang responsif
-        $('#example').on('click', '.card-header-toggle', function(e) {
-          const card = $(this).closest('.product-card');
-          const isActive = card.hasClass('active');
-          
-          // Tutup semua kartu lain jika ingin efek akordeon (opsional)
-          // $('.product-card').removeClass('active');
-          
-          card.toggleClass('active');
+        $('#example').on('click', '.card-header-toggle', function() {
+          $(this).closest('.product-card').toggleClass('active');
         });
       });
     </script>
